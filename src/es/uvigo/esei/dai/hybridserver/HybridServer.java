@@ -22,6 +22,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HybridServer {
 	private static final int SERVICE_PORT = 8888;
@@ -29,7 +31,7 @@ public class HybridServer {
 	private boolean stop;
 
 	public HybridServer() {
-		// TODO Auto-generated constructor stub
+		
 	}
 	
 	public HybridServer(Map<String, String> pages) {
@@ -49,12 +51,12 @@ public class HybridServer {
 			@Override
 			public void run() {
 				try (final ServerSocket serverSocket = new ServerSocket(SERVICE_PORT)) {
+					ExecutorService threadPool = Executors.newFixedThreadPool(50);
 					while (true) {
-						try (Socket socket = serverSocket.accept()) {
-							if (stop) break;
-							
+						Socket socket = serverSocket.accept();
+						if (stop) break;
+						threadPool.execute(new ServiceThread(socket));
 							// Responder al cliente
-						}
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
